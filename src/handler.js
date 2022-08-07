@@ -13,6 +13,25 @@ const addBookHandler = (request, h) => {
     reading,
   } = request.payload;
 
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: "fail",
+      message:
+        "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (name === undefined) {
+    const response = h.response({
+      status: "fail",
+      message: "Gagal menambahkan buku. Mohon isi nama buku",
+    });
+    response.code(400);
+    return response;
+  }
+
   const id = nanoid(16);
   if (pageCount === readPage) {
     finished = true;
@@ -41,24 +60,6 @@ const addBookHandler = (request, h) => {
   books.push(newBook);
 
   const isSuccess = books.filter((book) => book.id === id).length > 0;
-  if (readPage > pageCount) {
-    const response = h.response({
-      status: "fail",
-      message:
-        "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
-    });
-    response.code(400);
-    return response;
-  }
-
-  if (name === undefined) {
-    const response = h.response({
-      status: "fail",
-      message: "Gagal menambahkan buku. Mohon isi nama buku",
-    });
-    response.code(400);
-    return response;
-  }
 
   if (isSuccess) {
     const response = h.response({
@@ -81,19 +82,19 @@ const addBookHandler = (request, h) => {
 };
 
 const getAllBooksHandler = (request, h) => {
-  // const { name, reading, finished } = request.query;
+  const { name, reading, finished } = request.query;
 
-  // let booksGet = books;
-  // if (name) {
-  //   booksGet = booksGet.filter((book) =>
-  //     book.name.toLowerCase().includes(name.toLowerCase())
-  //   );
-  // }
-  // if (reading || finished) {
-  //   booksGet = booksGet.filter(
-  //     (book) => book.reading == reading || book.finished == finished
-  //   );
-  // }
+  let booksGet = books;
+  if (name) {
+    booksGet = booksGet.filter((book) =>
+      book.name.toLowerCase().includes(name.toLowerCase())
+    );
+  }
+  if (reading || finished) {
+    booksGet = booksGet.filter(
+      (book) => book.reading == reading || book.finished == finished
+    );
+  }
 
   const response = h.response({
     status: "success",
@@ -104,7 +105,7 @@ const getAllBooksHandler = (request, h) => {
         publisher: book.publisher,
       })),
     },
-    // query: request.query,
+    query: request.query,
   });
   response.code(200);
   return response;
